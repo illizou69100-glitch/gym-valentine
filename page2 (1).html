@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Workout Confirmed 💪❤️</title>
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+body{
+  background:black;
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-family: Arial, sans-serif;
+  overflow:hidden;
+}
+
+.video-wrapper{
+  width:100%;
+  height:100%;
+  position:fixed;
+  inset:0;
+  background:black;
+}
+
+video{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.overlay{
+  position:fixed;
+  inset:0;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  background:rgba(0,0,0,.65);
+  color:white;
+  text-align:center;
+  cursor:pointer;
+}
+
+.overlay h1{
+  font-size:2.2rem;
+  text-shadow:0 10px 30px rgba(0,0,0,.8);
+}
+</style>
+</head>
+
+<body>
+
+<div class="video-wrapper">
+  <video id="video" src="belle et bete.mov" playsinline></video>
+</div>
+
+<div class="overlay" id="overlay">
+  <h1>Workout confirmé 💪❤️<br>Clique pour lancer la vidéo</h1>
+</div>
+
+<script>
+const overlay = document.getElementById("overlay");
+const video = document.getElementById("video");
+
+overlay.addEventListener("click", () => {
+  overlay.style.display = "none";
+  video.play();
+});
+
+video.addEventListener("ended", () => {
+  overlay.style.display = "flex";
+  overlay.innerHTML = "<h1>💪❤️ Fin de la séance ❤️💪</h1>";
+});
+</script>
+
+</body>
+</html>
