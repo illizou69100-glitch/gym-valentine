@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Workout Confirmé 💪❤️</title>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  background:#000;
+  min-height:100vh;
+  font-family: Arial, sans-serif;
+  overflow:hidden;
+}
+.video-wrapper{
+  position:fixed;
+  inset:0;
+  background:#000;
+}
+video{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+.overlay{
+  position:fixed;
+  inset:0;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  background:rgba(0,0,0,.60);
+  color:#fff;
+  text-align:center;
+  padding:18px;
+  cursor:pointer;
+}
+.overlay h1{
+  font-size: clamp(22px, 5vw, 34px);
+  text-shadow:0 10px 30px rgba(0,0,0,.85);
+}
+.hint{
+  margin-top:10px;
+  opacity:.85;
+  font-size:14px;
+}
+.back{
+  position:fixed;
+  left:12px;
+  top:12px;
+  z-index:3;
+  border:none;
+  padding:10px 12px;
+  border-radius:12px;
+  background:rgba(255,255,255,.12);
+  color:#fff;
+  cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+<button class="back" onclick="window.location.href='index.html'">Retour</button>
+
+<div class="video-wrapper">
+  <video id="video" playsinline>
+    <source src="belle et bete.mov" type="video/quicktime">
+    <source src="belle-et-bete.mp4" type="video/mp4">
+  </video>
+</div>
+
+<div class="overlay" id="overlay">
+  <div>
+    <h1>Je savais que tu dirais oui 💪❤️</h1>
+    <div class="hint">Appuie pour lancer la vidéo</div>
+  </div>
+</div>
+
+<script>
+const overlay = document.getElementById("overlay");
+const video = document.getElementById("video");
+
+overlay.addEventListener("click", async () => {
+  overlay.style.display = "none";
+  try { await video.play(); }
+  catch(e){
+    overlay.style.display = "flex";
+    overlay.querySelector(".hint").textContent = "Si ça ne démarre pas, retape une fois sur l'écran.";
+  }
+});
+
+video.addEventListener("ended", () => {
+  overlay.style.display = "flex";
+  overlay.innerHTML = "<div><h1>💪❤️ Fin de la vidéo ❤️💪</h1><div class='hint'>Appuie pour rejouer</div></div>";
+});
+</script>
+
+</body>
+</html>
