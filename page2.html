@@ -79,6 +79,12 @@ video{
 <script>
 const overlay = document.getElementById("overlay");
 const video = document.getElementById("video");
+video.addEventListener("error", () => {
+  alert(
+    "Erreur vidéo (code) : " +
+    (video.error ? video.error.code : "inconnue")
+  );
+});
 
 overlay.addEventListener("click", async () => {
   overlay.style.display = "none";
