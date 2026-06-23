@@ -3,148 +3,587 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover" />
-  <title>BlackHole</title>
+  <title>blackhole</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Blackhole">
   <link rel="apple-touch-icon" href="icon-180.png">
   <link rel="manifest" href="manifest.json">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
-
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg: #000000;
-      --surface: #0a0a0a;
-      --ring: #2a2a2a;
-      --ring-glow: #444;
+      --bg: #0d0d0d;
+      --card: #1c1c1e;
+      --border: #2a2a2a;
       --text: #e8e8e8;
-      --muted: #8a7340;
-      --accent: #d4af6a;
-      --gold: #e0b975;
-      --gold-dim: #a8854f;
-      --hole: radial-gradient(ellipse at 38% 35%, #1a1a1a 0%, #000 55%);
+      --text-dim: #666;
+      --text-mid: #999;
     }
 
     html, body {
       height: 100%;
       background: var(--bg);
       color: var(--text);
-      font-family: 'Inter', sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif;
+      -webkit-font-smoothing: antialiased;
       overflow-x: hidden;
     }
 
-    .stars { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
-    .star { position: absolute; border-radius: 50%; background: #fff; animation: twinkle var(--d) ease-in-out infinite; animation-delay: var(--delay); }
-    @keyframes twinkle { 0%, 100% { opacity: var(--base); transform: scale(1); } 50% { opacity: 1; transform: scale(1.3); } }
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: max(env(safe-area-inset-top), 52px) 16px max(env(safe-area-inset-bottom), 28px);
+    }
 
-    .app { position: relative; z-index: 1; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 48px 20px 40px; gap: 0; }
+    .wrap {
+      width: 100%;
+      max-width: 420px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
 
-    .header { text-align: center; margin-bottom: 8px; }
-    .header h1 { font-size: 22px; font-weight: 600; letter-spacing: 3px; color: var(--gold); text-transform: uppercase; text-shadow: 0 0 20px rgba(224,185,117,0.25); }
-    .header p { font-size: 12px; color: var(--gold-dim); margin-top: 4px; letter-spacing: 1px; }
+    /* ── Header ── */
+    .top-bar {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 40px;
+    }
+    .logo { font-size: 16px; font-weight: 700; color: var(--text); letter-spacing: 0.5px; }
+    .icon-btn {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text-mid);
+      width: 34px; height: 34px;
+      border-radius: 9px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.15s, color 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .icon-btn:active, .icon-btn.on { background: var(--card); color: var(--text); }
+    .icon-btn svg { width: 16px; height: 16px; }
 
-    .hole-wrapper { position: relative; width: 240px; height: 240px; margin: 36px 0 40px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+    /* ── Settings ── */
+    .settings {
+      width: 100%;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 24px;
+      display: none;
+      gap: 12px;
+      flex-direction: column;
+    }
+    .settings.open { display: flex; }
+    .s-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .s-group label {
+      font-size: 10px; text-transform: uppercase; letter-spacing: 1px;
+      color: var(--text-dim); display: block; margin-bottom: 6px;
+    }
+    .s-group select {
+      width: 100%; background: var(--bg); border: 1px solid var(--border);
+      color: var(--text); padding: 9px 10px; border-radius: 9px;
+      font-size: 13px; font-family: inherit; -webkit-appearance: none; cursor: pointer;
+    }
+    .s-group select:focus { outline: none; border-color: var(--text-mid); }
+    .s-full { grid-column: span 2; }
+    .mode-row { display: flex; gap: 6px; }
+    .mode-btn {
+      flex: 1; padding: 9px 6px;
+      border: 1px solid var(--border); background: var(--bg);
+      color: var(--text-dim); border-radius: 9px;
+      cursor: pointer; font-size: 11px; font-family: inherit;
+      transition: all 0.15s; -webkit-tap-highlight-color: transparent;
+    }
+    .mode-btn.on { background: var(--text); color: var(--bg); border-color: var(--text); font-weight: 600; }
 
-    .ring { position: absolute; border-radius: 50%; border: 1px solid transparent; top: 50%; left: 50%; transform: translate(-50%, -50%) rotateX(72deg); pointer-events: none; }
-    .ring-1 { width: 200px; height: 200px; border-color: #3a2f18; box-shadow: 0 0 12px rgba(212,175,106,0.08); animation: spin 18s linear infinite; }
-    .ring-2 { width: 230px; height: 230px; border-color: #2e2512; animation: spin 28s linear infinite reverse; }
-    .ring-3 { width: 260px; height: 260px; border-color: #221b0e; animation: spin 40s linear infinite; }
+    /* ── Black hole ── */
+    .hole-area {
+      position: relative;
+      width: 220px; height: 220px;
+      margin-bottom: 28px;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      flex-shrink: 0;
+    }
 
-    @keyframes spin { from { transform: translate(-50%, -50%) rotateX(72deg) rotate(0deg); } to { transform: translate(-50%, -50%) rotateX(72deg) rotate(360deg); } }
+    .ring {
+      position: absolute; border-radius: 50%;
+      top: 50%; left: 50%;
+      transform: translate(-50%,-50%) rotateX(68deg);
+      pointer-events: none;
+      border: 1px solid;
+    }
+    .r1 { width: 178px; height: 178px; border-color: #2e2e2e; animation: rot 20s linear infinite; }
+    .r2 { width: 210px; height: 210px; border-color: #222; animation: rot 32s linear infinite reverse; }
+    .r3 { width: 240px; height: 240px; border-color: #1a1a1a; animation: rot 48s linear infinite; }
 
-    .hole-core { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 170px; height: 170px; border-radius: 50%; background: radial-gradient(ellipse at 38% 35%, #141414 0%, #000 60%); box-shadow: 0 0 0 1px #3a2f18, 0 0 40px rgba(0,0,0,0.9), inset 0 0 30px #000; transition: box-shadow 0.3s ease, transform 0.3s ease; }
-    .hole-wrapper:hover .hole-core, .hole-wrapper.active .hole-core { box-shadow: 0 0 0 1px #d4af6a, 0 0 60px rgba(212,175,106,0.25), 0 0 100px rgba(212,175,106,0.12), inset 0 0 40px #000; }
-    .hole-wrapper.sucking .hole-core { animation: suck 0.6s ease-in-out; }
-    @keyframes suck { 0% { transform: translate(-50%, -50%) scale(1); } 30% { transform: translate(-50%, -50%) scale(1.12); box-shadow: 0 0 0 2px #e0b975, 0 0 80px rgba(224,185,117,0.4), inset 0 0 50px #000; } 70% { transform: translate(-50%, -50%) scale(0.92); } 100% { transform: translate(-50%, -50%) scale(1); } }
+    @keyframes rot {
+      from { transform: translate(-50%,-50%) rotateX(68deg) rotate(0deg); }
+      to   { transform: translate(-50%,-50%) rotateX(68deg) rotate(360deg); }
+    }
 
-    .particle { position: absolute; border-radius: 50%; background: #d4af6a; pointer-events: none; animation: suck-particle 0.7s ease-in forwards; }
-    @keyframes suck-particle { 0% { opacity: 1; } 100% { opacity: 0; transform: translate(var(--tx), var(--ty)) scale(0); } }
+    .hole-core {
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%,-50%);
+      width: 154px; height: 154px; border-radius: 50%;
+      background: radial-gradient(ellipse at 36% 34%, #1e1e1e 0%, #000 58%);
+      box-shadow: 0 0 0 1px #2a2a2a, 0 0 50px rgba(0,0,0,0.9), inset 0 0 30px #000;
+      transition: box-shadow 0.35s, transform 0.35s;
+    }
 
-    .hint { font-size: 11px; color: #4a3d22; text-align: center; margin-top: -24px; margin-bottom: 32px; letter-spacing: 0.5px; transition: color 0.3s; }
-    .hint.ready { color: var(--gold-dim); }
+    /* states */
+    .hole-area.ready .hole-core {
+      box-shadow: 0 0 0 1px #555, 0 0 50px rgba(255,255,255,0.06), inset 0 0 30px #000;
+    }
+    .hole-area.ready .r1 { border-color: #3a3a3a; }
+    .hole-area.ready .r2 { border-color: #2e2e2e; }
 
-    .input-area { width: 100%; max-width: 380px; }
-    .paste-box { display: flex; align-items: center; background: #0c0c0c; border: 1px solid #2e2412; border-radius: 12px; padding: 14px 16px; gap: 10px; transition: border-color 0.2s; }
-    .paste-box:focus-within { border-color: var(--gold-dim); }
-    .paste-box input { flex: 1; background: none; border: none; outline: none; color: #e0c896; font-size: 14px; font-family: 'Inter', sans-serif; caret-color: var(--gold); }
-    .paste-box input::placeholder { color: #4a3d22; }
-    .paste-btn { background: none; border: none; color: var(--gold-dim); font-size: 12px; cursor: pointer; padding: 4px 8px; border-radius: 6px; transition: color 0.2s, background 0.2s; white-space: nowrap; }
-    .paste-btn:hover { color: var(--gold); background: #1a1508; }
+    .hole-area.loading .hole-core {
+      box-shadow: 0 0 0 1px #666, 0 0 60px rgba(255,255,255,0.1), inset 0 0 30px #000;
+    }
 
-    .platforms { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; justify-content: center; }
-    .chip { font-size: 10px; letter-spacing: 1px; color: #6b5830; border: 1px solid #2e2412; border-radius: 20px; padding: 4px 10px; text-transform: uppercase; }
+    .spin-ring {
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%,-50%);
+      width: 164px; height: 164px; border-radius: 50%;
+      border: 1.5px solid transparent;
+      border-top-color: #888;
+      display: none;
+      animation: fast-spin 0.75s linear infinite;
+      pointer-events: none;
+    }
+    .hole-area.loading .spin-ring { display: block; }
+    @keyframes fast-spin { to { transform: translate(-50%,-50%) rotate(360deg); } }
 
-    .status-area { margin-top: 28px; width: 100%; max-width: 380px; min-height: 60px; }
-    .status-msg { text-align: center; font-size: 13px; color: var(--gold-dim); padding: 12px; display: none; }
-    .status-msg.visible { display: block; }
-    .result-card { background: #0c0c0c; border: 1px solid #2e2412; border-radius: 14px; padding: 18px; display: none; flex-direction: column; gap: 12px; }
-    .result-card.visible { display: flex; }
-    .result-title { font-size: 13px; color: var(--gold); font-weight: 500; line-height: 1.4; }
-    .result-links { display: flex; flex-direction: column; gap: 8px; }
-    .dl-btn { display: flex; align-items: center; justify-content: space-between; background: #110d04; border: 1px solid #3a2f18; border-radius: 10px; padding: 12px 16px; text-decoration: none; color: #cda968; font-size: 13px; transition: border-color 0.2s, background 0.2s; cursor: pointer; }
-    .dl-btn:hover { background: #1a1408; border-color: var(--gold); color: var(--gold); }
-    .dl-btn .quality { font-size: 11px; color: var(--gold-dim); }
-    .error-msg { background: #0f0a0a; border: 1px solid #2a1a1a; border-radius: 12px; padding: 14px 16px; font-size: 12px; color: #664444; display: none; text-align: center; line-height: 1.5; }
-    .error-msg.visible { display: block; }
+    .hole-area.suck .hole-core { animation: suck-anim 0.55s ease-in-out; }
+    @keyframes suck-anim {
+      0%   { transform: translate(-50%,-50%) scale(1); }
+      30%  { transform: translate(-50%,-50%) scale(1.1); }
+      70%  { transform: translate(-50%,-50%) scale(0.93); }
+      100% { transform: translate(-50%,-50%) scale(1); }
+    }
 
-    .loading-ring { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 180px; height: 180px; border-radius: 50%; border: 1px solid transparent; border-top-color: var(--gold); display: none; animation: spin-fast 0.8s linear infinite; pointer-events: none; }
-    .hole-wrapper.loading .loading-ring { display: block; }
-    @keyframes spin-fast { to { transform: translate(-50%, -50%) rotate(360deg); } }
+    /* ── Status ── */
+    .status {
+      text-align: center;
+      min-height: 40px;
+      margin-bottom: 20px;
+    }
+    .status-main {
+      font-size: 14px; color: var(--text); font-weight: 500;
+      transition: opacity 0.2s;
+    }
+    .status-sub {
+      font-size: 12px; color: var(--text-dim); margin-top: 4px;
+      word-break: break-all; max-width: 320px;
+      display: -webkit-box; -webkit-line-clamp: 1;
+      -webkit-box-orient: vertical; overflow: hidden;
+    }
 
-    .footer { margin-top: auto; padding-top: 40px; font-size: 10px; color: #4a3d22; letter-spacing: 1px; text-align: center; }
+    /* ── Manual input (fallback) ── */
+    .manual-wrap {
+      width: 100%; max-width: 380px;
+      margin-bottom: 20px;
+    }
+    .manual-row {
+      display: flex; align-items: center;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; overflow: hidden;
+      transition: border-color 0.2s;
+    }
+    .manual-row:focus-within { border-color: #444; }
+    .manual-input {
+      flex: 1; background: none; border: none; outline: none;
+      color: var(--text); font-size: 14px; padding: 11px 14px;
+      font-family: inherit; min-width: 0;
+    }
+    .manual-input::placeholder { color: var(--text-dim); }
+    .manual-go {
+      background: var(--text); border: none; color: var(--bg);
+      padding: 0 14px; height: 44px;
+      cursor: pointer; font-size: 12px; font-weight: 600;
+      font-family: inherit; margin: 4px;
+      border-radius: 9px; white-space: nowrap;
+      transition: opacity 0.2s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .manual-go:disabled { opacity: 0.3; cursor: default; }
+
+    /* ── Results ── */
+    .results { width: 100%; max-width: 380px; }
+
+    .result-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 14px; overflow: hidden; display: none;
+    }
+    .result-card.show { display: block; }
+    .result-head {
+      padding: 11px 15px; font-size: 11px; color: var(--text-dim);
+      border-bottom: 1px solid var(--border); letter-spacing: 0.3px;
+    }
+    .dl-item {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 13px 15px; border-bottom: 1px solid var(--border);
+      text-decoration: none; color: var(--text); gap: 10px;
+      -webkit-tap-highlight-color: transparent; transition: background 0.15s;
+    }
+    .dl-item:last-child { border-bottom: none; }
+    .dl-item:active { background: rgba(255,255,255,0.04); }
+    .dl-name { font-size: 14px; font-weight: 500; }
+    .dl-sub  { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+    .dl-icon {
+      width: 32px; height: 32px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 8px; display: flex;
+      align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .dl-icon svg { width: 14px; height: 14px; }
+
+    .err-card {
+      background: #180e0e; border: 1px solid #3a1a1a;
+      border-radius: 14px; padding: 15px;
+      font-size: 13px; color: #d45555;
+      display: none; line-height: 1.5; text-align: center;
+    }
+    .err-card.show { display: block; }
+
+    /* ── Platforms ── */
+    .platforms {
+      display: flex; gap: 5px; flex-wrap: wrap;
+      justify-content: center; margin-top: 28px;
+    }
+    .plat {
+      font-size: 10px; color: #3a3a3a;
+      border: 1px solid #1e1e1e; border-radius: 6px;
+      padding: 3px 7px;
+    }
+
+    .footer {
+      margin-top: auto; padding-top: 32px;
+      text-align: center; font-size: 10px;
+      color: #2e2e2e; letter-spacing: 1.5px;
+    }
   </style>
 </head>
 <body>
-<div class="stars" id="stars"></div>
-<div class="app">
-  <div class="header"><h1>BlackHole</h1><p>Colle un lien &middot; Appuie sur le trou</p></div>
-  <div class="hole-wrapper" id="holeBtn">
-    <div class="ring ring-1"></div><div class="ring ring-2"></div><div class="ring ring-3"></div>
-    <div class="hole-core"></div><div class="loading-ring"></div>
+<div class="wrap">
+
+  <div class="top-bar">
+    <span class="logo">blackhole</span>
+    <button class="icon-btn" id="settingsBtn" aria-label="Paramètres">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+           stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+      </svg>
+    </button>
   </div>
-  <p class="hint" id="hint">Colle d'abord un lien ci-dessous</p>
-  <div class="input-area">
-    <div class="paste-box">
-      <input type="url" id="urlInput" placeholder="https://..." autocomplete="off" autocorrect="off" spellcheck="false" />
-      <button class="paste-btn" id="pasteBtn">Coller</button>
+
+  <div class="settings" id="settingsPanel">
+    <div class="s-row">
+      <div class="s-group">
+        <label>Qualité vidéo</label>
+        <select id="qualitySel">
+          <option value="max">Max</option>
+          <option value="2160">4K</option>
+          <option value="1440">1440p</option>
+          <option value="1080" selected>1080p</option>
+          <option value="720">720p</option>
+          <option value="480">480p</option>
+          <option value="360">360p</option>
+        </select>
+      </div>
+      <div class="s-group">
+        <label>Format audio</label>
+        <select id="audioSel">
+          <option value="best" selected>Meilleur</option>
+          <option value="mp3">MP3</option>
+          <option value="ogg">OGG</option>
+          <option value="wav">WAV</option>
+          <option value="opus">Opus</option>
+        </select>
+      </div>
     </div>
-    <div class="platforms">
-      <span class="chip">YouTube</span><span class="chip">Instagram</span><span class="chip">TikTok</span><span class="chip">X / Twitter</span><span class="chip">Facebook</span>
+    <div class="s-group s-full">
+      <label>Mode</label>
+      <div class="mode-row">
+        <button class="mode-btn on" data-mode="auto">Auto</button>
+        <button class="mode-btn" data-mode="audio">Audio</button>
+        <button class="mode-btn" data-mode="mute">Muet</button>
+      </div>
     </div>
   </div>
-  <div class="status-area">
-    <p class="status-msg" id="statusMsg"></p>
-    <div class="result-card" id="resultCard"><div class="result-title" id="resultTitle"></div><div class="result-links" id="resultLinks"></div></div>
-    <div class="error-msg" id="errorMsg"></div>
+
+  <!-- Black hole -->
+  <div class="hole-area" id="holeArea">
+    <div class="ring r1"></div>
+    <div class="ring r2"></div>
+    <div class="ring r3"></div>
+    <div class="hole-core"></div>
+    <div class="spin-ring"></div>
   </div>
-  <div class="footer">BLACKHOLE &middot; DOWNLOADER</div>
+
+  <!-- Status text -->
+  <div class="status">
+    <div class="status-main" id="statusMain">Appuie sur le trou</div>
+    <div class="status-sub" id="statusSub">Le lien sera lu depuis ton presse-papiers</div>
+  </div>
+
+  <!-- Manual fallback input -->
+  <div class="manual-wrap" id="manualWrap" style="display:none">
+    <div class="manual-row">
+      <input type="url" class="manual-input" id="manualInput"
+        placeholder="ou colle un lien manuellement…"
+        autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <button class="manual-go" id="manualGo" disabled>OK</button>
+    </div>
+  </div>
+
+  <!-- Results -->
+  <div class="results">
+    <div class="result-card" id="resultCard">
+      <div class="result-head" id="resultHead"></div>
+      <div id="resultLinks"></div>
+    </div>
+    <div class="err-card" id="errCard"></div>
+  </div>
+
+  <div class="platforms">
+    <span class="plat">YouTube</span>
+    <span class="plat">Instagram</span>
+    <span class="plat">TikTok</span>
+    <span class="plat">Twitter · X</span>
+    <span class="plat">Facebook</span>
+    <span class="plat">Vimeo</span>
+    <span class="plat">SoundCloud</span>
+    <span class="plat">Twitch</span>
+    <span class="plat">Pinterest</span>
+    <span class="plat">Reddit</span>
+  </div>
+
+  <div class="footer">BLACKHOLE · COBALT</div>
 </div>
+
 <script>
-  const starsEl = document.getElementById('stars');
-  for (let i = 0; i < 120; i++) {
-    const s = document.createElement('div'); s.className = 'star';
-    const size = Math.random() * 1.8 + 0.4;
-    const base = (Math.random() * 0.4 + 0.05).toFixed(2);
-    const dur = (Math.random() * 5 + 3).toFixed(1) + 's';
-    const delay = (Math.random() * 6).toFixed(1) + 's';
-    s.style.cssText = `width:${size}px;height:${size}px;top:${Math.random()*100}%;left:${Math.random()*100}%;--d:${dur};--delay:${delay};--base:${base};opacity:${base};`;
-    starsEl.appendChild(s);
+  const holeArea   = document.getElementById('holeArea');
+  const statusMain = document.getElementById('statusMain');
+  const statusSub  = document.getElementById('statusSub');
+  const manualWrap = document.getElementById('manualWrap');
+  const manualInput= document.getElementById('manualInput');
+  const manualGo   = document.getElementById('manualGo');
+  const settingsBtn= document.getElementById('settingsBtn');
+  const settingsPanel = document.getElementById('settingsPanel');
+  const qualitySel = document.getElementById('qualitySel');
+  const audioSel   = document.getElementById('audioSel');
+  const resultCard = document.getElementById('resultCard');
+  const resultHead = document.getElementById('resultHead');
+  const resultLinks= document.getElementById('resultLinks');
+  const errCard    = document.getElementById('errCard');
+
+  let dlMode = 'auto';
+  let isLoading = false;
+
+  /* ── Settings ── */
+  settingsBtn.addEventListener('click', () => {
+    settingsPanel.classList.toggle('open');
+    settingsBtn.classList.toggle('on');
+  });
+  document.querySelectorAll('.mode-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('on'));
+      btn.classList.add('on');
+      dlMode = btn.dataset.mode;
+    });
+  });
+
+  /* ── Manual input ── */
+  manualInput.addEventListener('input', () => {
+    manualGo.disabled = !manualInput.value.trim();
+  });
+  manualGo.addEventListener('click', () => {
+    const url = manualInput.value.trim();
+    if (url) startDownload(url);
+  });
+  manualInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !manualGo.disabled) startDownload(manualInput.value.trim());
+  });
+
+  /* ── Hole tap: read clipboard then download ── */
+  holeArea.addEventListener('click', async () => {
+    if (isLoading) return;
+
+    let url = '';
+    try {
+      url = (await navigator.clipboard.readText()).trim();
+    } catch {
+      /* clipboard access denied or not available */
+    }
+
+    if (url && isValidUrl(url)) {
+      statusSub.textContent = url;
+      startDownload(url);
+    } else {
+      /* no URL in clipboard → show manual input */
+      manualWrap.style.display = 'block';
+      manualInput.focus();
+      setStatus('Colle un lien ci-dessous', url ? 'Ce lien ne semble pas valide' : 'Rien trouvé dans le presse-papiers');
+      holeArea.classList.remove('ready');
+    }
+  });
+
+  function isValidUrl(s) {
+    try { return ['http:','https:'].includes(new URL(s).protocol); } catch { return false; }
   }
-  const holeBtn=document.getElementById('holeBtn'),urlInput=document.getElementById('urlInput'),pasteBtn=document.getElementById('pasteBtn'),hint=document.getElementById('hint'),statusMsg=document.getElementById('statusMsg'),resultCard=document.getElementById('resultCard'),resultTitle=document.getElementById('resultTitle'),resultLinks=document.getElementById('resultLinks'),errorMsg=document.getElementById('errorMsg');
-  let isLoading=false;
-  pasteBtn.addEventListener('click',async()=>{try{const t=await navigator.clipboard.readText();urlInput.value=t;urlInput.dispatchEvent(new Event('input'));}catch{urlInput.focus();}});
-  urlInput.addEventListener('input',()=>{const v=urlInput.value.trim();if(v){hint.textContent='Appuie sur le trou noir pour aspirer';hint.className='hint ready';}else{hint.textContent="Colle d'abord un lien ci-dessous";hint.className='hint';}clearResults();});
-  holeBtn.addEventListener('click',()=>{if(isLoading)return;const url=urlInput.value.trim();if(!url){urlInput.focus();shakePaste();return;}startDownload(url);});
-  function shakePaste(){const b=document.querySelector('.paste-box');b.style.transition='border-color 0.1s';b.style.borderColor='#2a1a1a';setTimeout(()=>b.style.borderColor='',400);}
-  function clearResults(){statusMsg.className='status-msg';resultCard.className='result-card';errorMsg.className='error-msg';}
-  function spawnParticles(){const r=holeBtn.getBoundingClientRect(),cx=r.width/2,cy=r.height/2;for(let i=0;i<12;i++){const p=document.createElement('div');p.className='particle';const a=Math.random()*Math.PI*2,d=80+Math.random()*40,px=cx+Math.cos(a)*d,py=cy+Math.sin(a)*d,sz=Math.random()*3+1;p.style.cssText=`width:${sz}px;height:${sz}px;left:${px}px;top:${py}px;--tx:${(cx-px)*0.9}px;--ty:${(cy-py)*0.9}px;animation-delay:${Math.random()*0.15}s;animation-duration:${0.5+Math.random()*0.3}s;`;holeBtn.appendChild(p);p.addEventListener('animationend',()=>p.remove());}}
-  async function startDownload(url){isLoading=true;holeBtn.classList.add('loading');clearResults();statusMsg.textContent='Aspiration en cours…';statusMsg.className='status-msg visible';spawnParticles();try{const result=await fetchLinks(url);holeBtn.classList.remove('loading');holeBtn.classList.add('sucking');setTimeout(()=>holeBtn.classList.remove('sucking'),700);showResult(result);}catch(err){holeBtn.classList.remove('loading');showError(err.message||'Impossible de traiter ce lien.');}isLoading=false;}
-  async function fetchLinks(url){const r=await fetch('https://api.cobalt.tools/',{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify({url,videoQuality:'1080',audioFormat:'mp3',downloadMode:'auto'})});if(!r.ok)throw new Error('Service indisponible. Réessaie dans un instant.');const d=await r.json();if(d.status==='error'||d.status==='rate-limit')throw new Error(d.error?.code==='error.api.link.unsupported'?'Ce site n\'est pas supporté.':d.error?.code?.replace('error.api.','')||'Lien non reconnu.');if(d.status==='picker')return{title:'Plusieurs médias détectés',links:d.picker.slice(0,6).map((item,i)=>({label:`Média ${i+1}`,quality:item.type||'video',url:item.url}))};if(d.status==='stream'||d.status==='redirect'||d.status==='tunnel')return{title:'Vidéo prête',links:[{label:'Télécharger la vidéo',quality:'meilleure qualité',url:d.url}]};throw new Error('Réponse inattendue du serveur.');}
-  function showResult(r){statusMsg.className='status-msg';errorMsg.className='error-msg';resultTitle.textContent=r.title;resultLinks.innerHTML='';r.links.forEach(l=>{const a=document.createElement('a');a.className='dl-btn';a.href=l.url;a.target='_blank';a.rel='noopener noreferrer';a.setAttribute('download','');a.innerHTML=`<span>${l.label}</span><span class="quality">${l.quality}</span>`;resultLinks.appendChild(a);});resultCard.className='result-card visible';}
-  function showError(m){statusMsg.className='status-msg';resultCard.className='result-card';errorMsg.textContent=m;errorMsg.className='error-msg visible';}
-  document.addEventListener('paste',e=>{const t=(e.clipboardData||window.clipboardData).getData('text');if(t&&t.startsWith('http')){urlInput.value=t;urlInput.dispatchEvent(new Event('input'));}});
+
+  /* ── Check clipboard on load / returning to app ── */
+  async function checkClipboard() {
+    try {
+      const text = (await navigator.clipboard.readText()).trim();
+      if (text && isValidUrl(text)) {
+        holeArea.classList.add('ready');
+        setStatus('Lien prêt — appuie sur le trou', shorten(text));
+      }
+    } catch { /* silently ignore */ }
+  }
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && !isLoading) {
+      checkClipboard();
+    }
+  });
+  /* try on load too (may fail without gesture on some browsers) */
+  checkClipboard();
+
+  function shorten(url) {
+    try {
+      const u = new URL(url);
+      return u.hostname.replace('www.','') + u.pathname.slice(0, 40) + (u.pathname.length > 40 ? '…' : '');
+    } catch { return url.slice(0, 50); }
+  }
+
+  function setStatus(main, sub) {
+    statusMain.textContent = main;
+    statusSub.textContent = sub || '';
+  }
+
+  function clearResults() {
+    resultCard.classList.remove('show');
+    errCard.classList.remove('show');
+  }
+
+  /* ── Download flow ── */
+  async function startDownload(url) {
+    isLoading = true;
+    clearResults();
+    holeArea.classList.remove('ready', 'suck');
+    holeArea.classList.add('loading');
+    setStatus('Aspiration en cours…', shorten(url));
+
+    try {
+      const data = await cobalt(url);
+      holeArea.classList.remove('loading');
+      holeArea.classList.add('suck');
+      setTimeout(() => holeArea.classList.remove('suck'), 600);
+      showResult(data);
+      setStatus('Téléchargement prêt', shorten(url));
+    } catch (e) {
+      holeArea.classList.remove('loading');
+      errCard.textContent = e.message;
+      errCard.classList.add('show');
+      setStatus('Appuie sur le trou', 'Le lien sera lu depuis ton presse-papiers');
+    }
+
+    isLoading = false;
+  }
+
+  async function cobalt(url) {
+    let res;
+    try {
+      res = await fetch('https://api.cobalt.tools/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({
+          url,
+          videoQuality: qualitySel.value,
+          audioFormat: audioSel.value,
+          downloadMode: dlMode
+        })
+      });
+    } catch {
+      throw new Error('Impossible de contacter le serveur. Vérifie ta connexion.');
+    }
+
+    let d;
+    try { d = await res.json(); } catch { throw new Error('Réponse serveur invalide.'); }
+
+    if (d.status === 'error' || !res.ok) {
+      const code = d?.error?.code || '';
+      if (code.includes('link.unsupported')) throw new Error('Ce site n\'est pas supporté.');
+      if (code.includes('link.invalid') || code.includes('link.empty')) throw new Error('Lien invalide.');
+      if (code.includes('rate') || d.status === 'rate-limit') throw new Error('Trop de requêtes — réessaie dans quelques secondes.');
+      if (code.includes('fetch.empty')) throw new Error('Aucun contenu trouvé à cette URL.');
+      throw new Error(code ? code.replace('error.api.', '') : 'Erreur. Réessaie.');
+    }
+
+    if (d.status === 'picker') {
+      return {
+        head: `${d.picker.length} fichier(s) disponible(s)`,
+        links: d.picker.slice(0, 10).map((it, i) => ({
+          name: it.type === 'photo' ? `Photo ${i+1}` : `Vidéo ${i+1}`,
+          sub: it.type || 'media',
+          url: it.url
+        }))
+      };
+    }
+
+    if (d.url) {
+      const isAudio = dlMode === 'audio';
+      const q = qualitySel.value === 'max' ? 'max' : qualitySel.value + 'p';
+      return {
+        head: 'Prêt à télécharger',
+        links: [{
+          name: isAudio ? 'Télécharger l\'audio' : 'Télécharger la vidéo',
+          sub: isAudio ? audioSel.value : q,
+          url: d.url
+        }]
+      };
+    }
+
+    throw new Error('Réponse inattendue.');
+  }
+
+  function showResult(r) {
+    resultHead.textContent = r.head;
+    resultLinks.innerHTML = '';
+    r.links.forEach(l => {
+      const a = document.createElement('a');
+      a.className = 'dl-item';
+      a.href = l.url;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      a.setAttribute('download', '');
+      a.innerHTML = `
+        <div>
+          <div class="dl-name">${l.name}</div>
+          <div class="dl-sub">${l.sub}</div>
+        </div>
+        <div class="dl-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+               stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 5v14M5 12l7 7 7-7"/>
+          </svg>
+        </div>`;
+      resultLinks.appendChild(a);
+    });
+    resultCard.classList.add('show');
+  }
 </script>
 </body>
 </html>
